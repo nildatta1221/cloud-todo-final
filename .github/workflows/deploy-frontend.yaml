@@ -6,14 +6,13 @@ on:
       - main
     paths:
       - "frontend-app/**"
+      - ".github/workflows/deploy-frontend.yml"
 
 jobs:
   build-and-deploy:
-
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout repo
         uses: actions/checkout@v4
 
@@ -28,17 +27,22 @@ jobs:
         with:
           context: ./frontend-app
           push: true
-          tags: nildatta123/todolist-frontend:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/todolist-frontend-ai:v1
 
-      - name: Set kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
-      
-      - name: Install GKE auth plugin
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y google-cloud-cli-gke-gcloud-auth-plugin
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: todolist-cluster
+          location: us-east4-c
+          project_id: cisc5550-491418
 
       - name: Restart frontend deployment
         run: |
