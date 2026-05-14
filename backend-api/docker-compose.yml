@@ -1,0 +1,33 @@
+services:
+
+  mysql-db:
+    image: mysql:8.0
+
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: tododb
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    ports:
+      - "3306:3306"
+
+  backend-api:
+    build: .
+
+    environment:
+      DB_HOST: mysql-db
+      DB_USER: root
+      DB_PASSWORD: rootpass
+      DB_NAME: tododb
+      GEMINI_API_KEY: AIzaSyCPb8YfaqBRUv5ioUKdnlAeMXjfoZnoEfo
+
+    ports:
+      - "5001:5001"
+
+    depends_on:
+      - mysql-db
+
+volumes:
+  mysql_data:

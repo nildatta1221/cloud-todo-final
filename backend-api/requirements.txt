@@ -1,0 +1,3 @@
+Flask
+google-genai
+mysql-connector-python
